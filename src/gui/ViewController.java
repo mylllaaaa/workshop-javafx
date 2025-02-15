@@ -1,49 +1,63 @@
 package gui;
 
 import java.net.URL;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
-import gui.util.Alerts;
-import gui.util.Constraints;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.util.Callback;
+import model.entities.Person;
 
 public class ViewController implements Initializable {
 	
 	@FXML
-	private TextField txtNumber1;
+	private ComboBox<Person> comboBoxPerson;
 	@FXML
-	private TextField txtNumber2;
-	@FXML
-	private Label labelResult;
-	@FXML
-	private Button btSum;
+	private Button btAll;
 	
-	@FXML 
-	public void onBtSumAction() {
-		try {
-			Locale.setDefault(Locale.US);
-			double num1 = Double.parseDouble(txtNumber1.getText());
-			double num2 = Double.parseDouble(txtNumber2.getText());
-			double sum = num1 + num2;
-			labelResult.setText(String.format("%.2f", sum));
-		}
-		catch(NumberFormatException e) {
-			Alerts.showAlert("Error", "Parse error", e.getMessage(), AlertType.ERROR);
+	private ObservableList<Person> obsList; //simplifica a gestão de listas dinâmicas e a atualização da UI em resposta a mudanças nos dados.
+	
+	@FXML
+	public void onComboBoxAction() {
+		Person person = comboBoxPerson.getSelectionModel().getSelectedItem(); //getSelectionModel -  é essencial para interagir com a seleção de itens em componentes JavaFX. Ele permite controlar e responder à seleção do usuário de forma dinâmica e eficiente. 
+		System.out.println(person);
+	}
+	
+	@FXML
+	public void onBtAllAction() {
+		for(Person x : comboBoxPerson.getItems()) {
+			System.out.println(x);
 		}
 	}
-
+	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) { //essas ações serão executadas na hora da instanciação da classe 
-		Constraints.setTextFieldDouble(txtNumber1);
-		Constraints.setTextFieldDouble(txtNumber2);
-		Constraints.setTextFieldMaxLength(txtNumber1, 5); //para limitar a quantidade de caracteres dos números
-		Constraints.setTextFieldMaxLength(txtNumber2, 5);
+		List<Person> list = new ArrayList<>();
+		list.add(new Person(1, "Darrow o'Lykos","thereaperofmars@gmail.com"));
+		list.add(new Person(2, "Cassius Bellona","themanwhokilledfear@gmail.com"));
+		list.add(new Person(3, "Virginia Augustus","mustangthesovereign@gmail.com"));
+		
+		obsList = FXCollections.observableArrayList(list);
+		comboBoxPerson.setItems(obsList); //vai carregar esses elementos para o comboboc no Scane Builder
+	
+		Callback<ListView<Person>, ListCell<Person>> factory = lv -> new ListCell<Person>() {
+			@Override
+			protected void updateItem(Person item, boolean empty) {
+				super.updateItem(item, empty);
+				setText(empty ? "" : item.getName());
+			}
+		};
+		
+		comboBoxPerson.setCellFactory(factory);
+		comboBoxPerson.setButtonCell(factory.call(null)); 
 	}
 	
 }
